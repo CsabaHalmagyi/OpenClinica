@@ -90,8 +90,13 @@ $objWriter->save($mapFile);
 flush();
 ob_flush();
 
-
-$study = $_SESSION['studyoid'];
+if (isset($_SESSION['siteoid']) && strlen($_SESSION['siteoid'])>0){
+	$study = $_SESSION['siteoid'];
+}
+else{
+	$study = $_SESSION['studyoid'];
+	
+}
 $odmXML = new ocODMclinicalDataE($study, 1, array());
 
 
@@ -266,6 +271,7 @@ $highestColumn = $sheet->getHighestColumn();
 		
 	
 	$xmlName = "import_".$_SESSION['importid'].".xml";
+	$importID = $_SESSION['importid'];
 	//$xml->saveXML("savedxmls/".$xmlName);
 	file_put_contents('savedxmls/'.htmlspecialchars($_SESSION['user_name']).'/'.$xmlName,$xml);
 	echo '</tbody></table>';
@@ -284,8 +290,10 @@ $highestColumn = $sheet->getHighestColumn();
 	if (is_file("savedxmls/".htmlspecialchars($_SESSION['user_name']).'/'.$xmlName)){
 		//$_SESSION['importid']=$new_importid;
 		echo '<p><span class="success"><b>XML import file created successfully.</b></span><br/>';
-		echo '<a href="savedxmls/'.htmlspecialchars($_SESSION['user_name']).'/'.$xmlName.'">Download XML</a>(Right click, save as)';
+		
+		echo '<button type="button" onclick="location.href=\'download.php?type=x&id='.$importID.'\'">Download '.$xmlName.'</button>';
 		if (isset($allowImport) && $allowImport){
+			
 		echo '<br/><br/><a href="importxml.php" class="easyui-linkbutton" data-options="iconCls:\'icon-next\'">Import data from this XML</a></p>';}
 	}
 	else {

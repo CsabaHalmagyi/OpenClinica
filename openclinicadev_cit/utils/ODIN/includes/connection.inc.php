@@ -32,3 +32,10 @@ function is_logged_in(){
 		die();
 	}
 }
+
+function is_logged_out(){
+	if ($_SESSION['user_id']){
+		redirect("index.php");
+		die();
+	}
+}

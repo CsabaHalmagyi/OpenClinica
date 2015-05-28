@@ -9,7 +9,7 @@
 
 require_once 'includes/connection.inc.php';
 
-
+is_logged_out();
 //if the login form was submitted
 if (count($_POST)!=0) {
 	//create an empty error array

@@ -5,6 +5,8 @@ is_logged_in();
 require($_SESSION['settingsfile']);
 //unset site settings if there were any
 unset($_SESSION['siteprotname']);
+unset($_SESSION['siteoid']);
+
 unset($_SESSION['studyParamConf']);
 //var_dump($_SESSION);
 ?>

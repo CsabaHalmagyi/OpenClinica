@@ -21,12 +21,30 @@ $odmMeta = simplexml_load_string($odmMetaRaw[0]);
 $odmMeta->registerXPathNamespace('odm', OpenClinicaSoapWebService::NS_ODM);
 
 $studoid = (string)$odmMeta->Study->attributes()->OID;
+
+//extract the site oid if a site was selected
+
+if (isset($_SESSION['siteprotname']) && strlen($_SESSION['siteprotname'])>0){
+	
+	foreach($odmMeta->Study as $studies){
+		
+		$siteref = $ocUniqueProtocolId." - ".$_SESSION['siteprotname'];
+		
+		if ((string)$studies->GlobalVariables->ProtocolName == $siteref){
+			$_SESSION['siteoid']=(string)$studies->attributes()->OID;
+		}
+	}
+	
+}
+
+
 if (strlen($studoid)>0){
 	$_SESSION['studyoid']=$studoid;
 }
 
 //get the study parameter configuration
 $studyParamConf = array();
+
 foreach ($odmMeta->Study->MetaDataVersion as $MetaDVer){
 	$namespaces = $MetaDVer->getNameSpaces(true);
 	$OpenClinica = $MetaDVer->children($namespaces['OpenClinica'])->StudyDetails;

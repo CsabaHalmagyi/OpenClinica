@@ -304,7 +304,7 @@ echo '</div></td><td>';
 
 echo '<div class="right">';
 echo '<table>';
-echo '<thead><tr><td>Headers from xls</td></tr></thead>';
+echo '<thead><tr><td>Headers from csv</td></tr></thead>';
 echo '<tbody>';
 for ($i=0;$i<sizeof($excelHeaders);$i++){
 echo '<tr>';

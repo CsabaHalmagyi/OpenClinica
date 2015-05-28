@@ -295,3 +295,7 @@ td.aright{
 #dataImportResult tbody tr{
 	font-size: 77%;
 }		
+
+#progressbar{
+margin-left:10px;
+}	 

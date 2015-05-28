@@ -203,7 +203,7 @@ for ($row = 2; $row <= $highestRow; $row++) {
 
 
 			//display the result
-        	echo 'Subject name in xlsx: '.$subj."<br/>";
+        	echo 'Subject name in csv: '.$subj."<br/>";
         	if (isset($result['oc_oid'])){
         		$succesCount++;
         		$subjoid = $result['oc_oid'];
@@ -243,11 +243,15 @@ $objWriter->save("temp/oid_".$_SESSION['importid']."_.csv");
 
 echo '<p>';
 echo 'Subjects import finished.<br/><br/>';
-echo 'Successful imports: '.$succesCount.'<br/>';
+echo 'Subj OIDs retrieved: '.$succesCount.'<br/>';
 echo 'New subjects: '.$newSubjectsCount.'<br/>';
 echo 'Errors: '.$failCount.'<br/></p>';
 
-echo '<p><a href="schedule.php" class="easyui-linkbutton" data-options="iconCls:\'icon-large-clipart\'">Continue to scheduling events</a></p>';
+if ($succesCount>0)
+	echo '<p><a href="schedule.php" class="easyui-linkbutton" data-options="iconCls:\'icon-large-clipart\'">Continue to scheduling events</a></p>';
+else {
+	echo '<a href="index.php" class="easyui-linkbutton" data-options="iconCls:\'icon-back\'">Go back</a></p>';
+}
 /* 
 
 

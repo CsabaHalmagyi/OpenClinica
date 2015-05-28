@@ -8,7 +8,7 @@ require($_SESSION['settingsfile']);
 
 <table>
 <tr><td>Data file template</td><td>Mapping file template</td></tr>
-<tr><td><a href="templates/odin_data_template.csv">(Right click, save as)</a></td><td><a href="templates/odin_mapping_template.csv">(Right click, save as)</a></td></tr>
+<tr><td><button type="button" onclick="location.href='download.php?type=dtemp&id=1'">Data template</button></td><td><button type="button" onclick="location.href='download.php?type=mtemp&id=1'">Mapping template</button></td></tr>
 
 </table>
 
