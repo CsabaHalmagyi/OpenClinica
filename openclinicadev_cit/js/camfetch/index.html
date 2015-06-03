@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Camfetch Copy/Paste page</title>
+</head>
+<body>
+<p>
+<center><h2>Camfetch Copy/Paste page</h2></center>
+</p>
+<br/>
+
+<p>
+<h3>Human Phenotype Ontology Lookup for repeating items</h3>
+
+<b>Sections – Instructions:</b>
+<xmp>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="http://openclinica-testing.medschl.cam.ac.uk/css/oc-styles.css">
+<script src="http://openclinica-testing.medschl.cam.ac.uk/js/camfetch/hpo.js"></script>
+</xmp>
+<b>Items – Left item text</b> [Where the first parameter (MyGroupLabel in this example) should be equal to the GROUP_LABEL value, followed by the number which refers to the Term input field position in the grid. The HPO code will be inserted to the input field followed by the Term field.]:
+<xmp>
+Term
+<script>
+jQuery(document).ready(function() {
+HPO("MyGroupLabel", 1);
+});
+</script>
+</xmp>
+
+<img src="img/hpo.png"/>
+</p>
+
+<br/>
+<p>
+<h3>SNOMED Lookup for repeating items</h3>
+
+<b>Sections – Instructions:</b>
+<xmp>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="http://openclinica-testing.medschl.cam.ac.uk/css/oc-styles.css">
+<script src="http://openclinica-testing.medschl.cam.ac.uk/js/camfetch/snomed.js"></script>
+</xmp>
+<b>Items – Left item text</b> [Where the first parameter (MyGroupLabel in this example) should be equal to the GROUP_LABEL value, followed by the number which refers to the Term input field position in the grid. The SNOMED code will be inserted to the input field followed by the Term field.]:
+<xmp>
+SNOMED Term
+<script>
+jQuery(document).ready(function(){
+Snomed_rep("MyGroupLabel", 1);
+});
+</script>
+</xmp>
+
+<img src="img/snomed.png"/>
+</p>
+
+<br/>
+<p>
+<h3>NHS Medication Lookup for repeating items</h3>
+
+<b>Sections – Instructions:</b>
+<xmp>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="http://openclinica-testing.medschl.cam.ac.uk/css/oc-styles.css">
+<script src="http://openclinica-testing.medschl.cam.ac.uk/js/camfetch/medication.js"></script>
+</xmp>
+<b>Items – Left item text</b> [Where the first parameter (Medication in this example) should be equal to the GROUP_LABEL value, followed by the number which refers to the Drug name input field position in the grid. The Drug code will be inserted to the input field followed by the Drug name field.]:
+<xmp>
+Drug name
+<script> 
+jQuery(document).ready(function(){
+Medlist("Medication", 1); 
+});
+</script>
+</xmp>
+
+<img src="img/medication.png"/>
+</p>
+
+
+
+<br/>
+<p>
+<h3>Google Spreadsheet Lookup for NONrepeating items</h3>
+(the spreadsheet should be published and visible to all users)
+<br/><br/>
+<b>Sections – Instructions:</b>
+<xmp>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<script src="//openclinica-testing.medschl.cam.ac.uk/js/camfetch/google.js"></script>
+</xmp>
+
+<b>Items – Left item text</b>
+<xmp>
+Choose an option <span id="MyResponse"></span>
+</xmp>
+<b>Items – right item text</b> [Where the first parameter should be the Google Spreadsheet Document ID (15ZxIcq9YL5r9-0p8JMPHn3kV04HyqlAi3YFtnf6N8T4 in this example), 
+the second parameter (MyResponse in this example) should be equal to the span id value in LEFT_ITEM_TEXT, followed by the number which refers the column number in your 
+Google Spreadsheet (in this example the script will lookup the data from the third column).]:
+<xmp>
+<script>
+jQuery(document).ready(function(){
+spreadsheetLookup("15ZxIcq9YL5r9-0p8JMPHn3kV04HyqlAi3YFtnf6N8T4","MyResponse", 3);
+});
+</script>
+</xmp>
+
+<img src="img/google.png"/>
+</p>
+
+
+
+<br/>
+<p>
+<h3>Panogram for NONrepeating items</h3>
+
+<b>Sections – Instructions:</b>
+<xmp>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="http://openclinica-testing.medschl.cam.ac.uk/css/oc-styles.css">
+<script src="http://openclinica-testing.medschl.cam.ac.uk/js/camfetch/panogram.js"></script>
+</xmp>
+
+<b>Items – Left item text</b><br/> 
+Family ID
+<br/><br/>
+<b>Items – right item text</b> 
+
+<xmp>
+<script>
+jQuery(document).ready(function(){
+Panogram();
+});
+</script><div id="PanogramNavigateArea">
+</xmp>
+
+<img src="img/panogram.png"/>
+</p>
+
+
+
+
+
+</body>
+</html>
