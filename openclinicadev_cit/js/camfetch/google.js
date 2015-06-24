@@ -25,27 +25,20 @@ function spreadsheetLookup(doc, to, col){
 			col=1;
 		}
 		//if the passed parameter is a string convert to integer
-		col=parseInt(col);
+		colNr=parseInt(col);
 			//read the content to an array
 			jQuery.getJSON(jsonUrl, function(data) {
 				var entries = data.feed.entry || [];
-				
-				//determine the maximum number in a row						
-				var maxx = 1; 
-				for ( var j = col+1; j < entries.length; ++j ) {
-					if ( parseInt(entries[j].gs$cell.col) > maxx ) maxx = parseInt(entries[j].gs$cell.col);
+
+				for (var j=0;j<entries.length;j++){
+					var actualCol = parseInt(entries[j].gs$cell.col);
+ 					if (parseInt(entries[j].gs$cell.col) == colNr && parseInt(entries[j].gs$cell.row) != 1 ){
+						var optionElement = data.feed.entry[j].gs$cell.$t;
+
+		      		    database.push(optionElement);
+
+					}
 				}
-				
-				// if the passed parameter for the column is invalid, set the column to the max size
-				if (col>maxx) col = maxx;
-				
-				// loop through the array 
-				for (var i=col+maxx-1;i<data.feed.entry.length; i+=maxx){
-					var rowId = data.feed.entry[i].content.$t;
-					//take the value from the array
-	      		    var optionElement = entries[i].content.$t; 
-	      		    database.push(optionElement);
-		        }
 
 		});
 			//autocomplete the "to" field
