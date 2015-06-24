@@ -49,18 +49,20 @@ function connectToHPOService(me, clNr) {
 								url : urlToService,
 								dataType : "json",
 								data : {
-									name : request.name
+									name : request.Name
 								},
 								success : function(data) {
 									var datas = data.resultsInName
-											.concat(data.resultsInSynonym);
+											.concat(data.resultsInSynonym)
+											.concat(data.resultsInDescription);
+									
 									response(jQuery.map(datas, function(item) {
 										return {
-											label : item.name,
-											name : item.name,
-											id : item.id,
-											synonyms : item.synonyms,
-											def : item.def
+											label : item.Name,
+											name : item.Name,
+											id : item.ID,
+											synonyms : item.Synonyms,
+											def : item.Def
 										};
 									}));
 								}
