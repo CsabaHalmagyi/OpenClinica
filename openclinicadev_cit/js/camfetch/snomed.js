@@ -51,9 +51,9 @@ function connectToSnomed(me, colNrPassed) {
 									var datas = data.data;
 									response(jQuery.map(datas, function(item) {
 										return {
-											label : item.snomed_term,
-											name : item.snomed_term,
-											id : item.snomed_ct,
+											label : item.FULLYSPECIFIEDNAME,
+											name : item.FULLYSPECIFIEDNAME,
+											id : item.SNOMEDID,
 
 										};
 									}));
