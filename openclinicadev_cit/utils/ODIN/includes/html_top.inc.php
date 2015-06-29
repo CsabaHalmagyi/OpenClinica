@@ -20,12 +20,12 @@ $progressDefinitions = array(
 				
 );
 if (isset($allowImport) && $allowImport){
-	$progressPhases=["Select a study", "Upload data file", "Validate data file", "Import subjects", "Schedule events", 
-				"Upload mapping file", "Define CRF versions", "Mapping", "Create XML", "Import"];
+	$progressPhases=array("Select a study", "Upload data file", "Validate data file", "Import subjects", "Schedule events", 
+				"Upload mapping file", "Define CRF versions", "Mapping", "Create XML", "Import");
 }
 else{
-	$progressPhases=["Select a study", "Upload data file", "Validate data file", "Import subjects", "Schedule events",
-	"Upload mapping file", "Define CRF versions", "Mapping", "Create XML"];
+	$progressPhases=array("Select a study", "Upload data file", "Validate data file", "Import subjects", "Schedule events",
+	"Upload mapping file", "Define CRF versions", "Mapping", "Create XML");
 }
 
 ?>

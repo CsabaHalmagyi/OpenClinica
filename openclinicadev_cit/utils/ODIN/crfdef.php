@@ -165,14 +165,14 @@ $(document).ready(function() {
 			}
         insertList = insertList+"</ul>";
         //alert(insertList);
-        var listId = selId+"Â£Â£"+targetFID+"_list";
+        var listId = selId+"££"+targetFID+"_list";
         //replace the content in the table
         $("#"+listId).html(insertList);	
     });
 
     $('.crfAll').change(function() {
 	var checkId = $(this).attr("id");
-	checkId = checkId.replace("Â£Â£","##");
+	checkId = checkId.replace("££","##");
 	//stores the position of the last underscore in the Id
 	var last_ = checkId.lastIndexOf("_");
 	checkId = checkId.substring(0, last_);
@@ -283,7 +283,7 @@ foreach ($formR as $fr){
 		echo $ev['name']; //print event
 		
 		echo '</td><td>'.$forms[$fr]['name'].'</td>';
-		echo '<td><input type="checkbox" class="crfAll" id="'.$ekey.'Â£Â£'.$fr.'" checked/>';
+		echo '<td><input type="checkbox" class="crfAll" id="'.$ekey.'££'.$fr.'" checked/>';
 		echo '</td>'; //print form
 		
 		echo '<td><select id="'.$ekey.'##'.$fr.'">';
@@ -300,7 +300,7 @@ foreach ($formR as $fr){
 		
 		echo '</select></td>';
 		
-		echo '<td id="'.$ekey.'Â£Â£'.$firstFR.'_list" class="aleft">';
+		echo '<td id="'.$ekey.'££'.$firstFR.'_list" class="aleft">';
 		echo '<ul>';
 		
 		//$fr = $ev['refs'][0];

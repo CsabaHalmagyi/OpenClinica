@@ -268,6 +268,7 @@ echo '<thead><tr><td>CRF items</td><td>Associated item</td></tr></thead>';
 echo '<tbody>';
 $prevForm='';
 $rowCounter=0;
+$mapAutoAssigned=array();
 foreach($cbdata as $cb){
 
 	$item = explode("##",$cb);
@@ -290,6 +291,7 @@ foreach($cbdata as $cb){
 		//if mapvalue is a valid excel header
 		if(in_array($mappingData[$cb],$excelHeaders)){
 			echo '<div id="'.$cb.'" class="item assigned">'.$mappingData[$cb].'</div>';
+			$mapAutoAssigned[]=$mappingData[$cb];
 		}
 	}
 	
@@ -307,7 +309,11 @@ echo '<table>';
 echo '<thead><tr><td>Headers from csv</td></tr></thead>';
 echo '<tbody>';
 for ($i=0;$i<sizeof($excelHeaders);$i++){
-echo '<tr>';
+	if (in_array($excelHeaders[$i],$mapAutoAssigned) ){
+		echo '<tr style="display:none;">';
+	}
+	else {
+		echo '<tr>';}
 echo '<td><div class="item">'.$excelHeaders[$i].'</div></td>';	
 echo '</tr>';
 }

@@ -27,7 +27,12 @@ if (count($_POST)!=0) {
     //if the form was filled properly
     if (count($error)==0) {
         $sha1pass=sha1($_POST['password']);
+        
+        try {
         $dbh = new PDO("pgsql:dbname=$db;host=$dbhost", $dbuser, $dbpass );
+        }catch (PDOException $e) {
+   			 echo 'Connection failed: ' . $e->getMessage();
+			}
         $query = "SELECT * FROM user_account WHERE user_name='".trim($_POST['username'])."'";
         
         $sth = $dbh->prepare($query);
