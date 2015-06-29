@@ -63,24 +63,24 @@ else {
 
 //SAVING THE MAPPING FILE
 $mapFile = 'map/'.htmlspecialchars($_SESSION['user_name']).'/map_'.$_SESSION['importid'].'_.csv';
-$objectPHPExcel = new PHPExcel();
-$objectPHPExcel->setActiveSheetIndex(0);
+$objectPHPExcelMap = new PHPExcel();
+$objectPHPExcelMap->setActiveSheetIndex(0);
 
 //set excel headers
-$objectPHPExcel->getActiveSheet()->SetCellValue('A1', 'ItemOID');
-$objectPHPExcel->getActiveSheet()->SetCellValue('B1', 'ItemName');
-$objectPHPExcel->getActiveSheet()->SetCellValue('C1', 'XlsName');
+$objectPHPExcelMap->getActiveSheet()->SetCellValue('A1', 'ItemOID');
+$objectPHPExcelMap->getActiveSheet()->SetCellValue('B1', 'ItemName');
+$objectPHPExcelMap->getActiveSheet()->SetCellValue('C1', 'XlsName');
 
 $rowCounter = 2;
 foreach ($mapdata as $xlsHeader=>$itemFullOid){
-	$objectPHPExcel->getActiveSheet()->SetCellValue('C'.$rowCounter, $xlsHeader);
-	$objectPHPExcel->getActiveSheet()->SetCellValue('A'.$rowCounter, $itemFullOid);
+	$objectPHPExcelMap->getActiveSheet()->SetCellValue('C'.$rowCounter, $xlsHeader);
+	$objectPHPExcelMap->getActiveSheet()->SetCellValue('A'.$rowCounter, $itemFullOid);
 	$itemNames = explode("##",$itemFullOid);
 	$itemName = $eventsAll[$itemNames[0]]['name'].' '.$formsAll[$itemNames[1]]['name'].' '.$itemsAll[$itemNames[3]]['name'];
-	$objectPHPExcel->getActiveSheet()->SetCellValue('B'.$rowCounter, $itemName);
+	$objectPHPExcelMap->getActiveSheet()->SetCellValue('B'.$rowCounter, $itemName);
 	$rowCounter++;
 }
-$objWriter = PHPExcel_IOFactory::createWriter($objectPHPExcel, 'CSV');
+$objWriter = PHPExcel_IOFactory::createWriter($objectPHPExcelMap, 'CSV');
 $objWriter->save($mapFile);
 
 
