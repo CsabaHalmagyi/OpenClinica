@@ -4,6 +4,14 @@ require_once 'includes/html_top.inc.php';
 
 is_logged_in();
 require($_SESSION['settingsfile']);
+require_once 'config/odinconfig.inc.php';
+
+if(!isset($deleteFilesOlderThan) || intval($deleteFilesOlderThan)==0){
+	$filesKept = "Never";
+}
+else {
+	$filesKept = "after ".intval(intval($deleteFilesOlderThan)/(3600*24))." day(s)";
+}
 
 echo '<br/>';
 echo '<table>';
@@ -12,6 +20,7 @@ echo '<tr><td>First name</td><td><span style="font-weight: bold;">'.htmlspecialc
 echo '<tr><td>Last name</td><td><span style="font-weight: bold;">'.htmlspecialchars($_SESSION['last_name']).'</span></td></tr>';
 echo '<tr><td>Email</td><td><span style="font-weight: bold;">'.htmlspecialchars($_SESSION['email']).'</span></td></tr>';
 echo '<tr><td>Current Import ID</td><td><span style="font-weight: bold;">'.$_SESSION['importid'].'</span></td></tr>';
+echo '<tr><td>Files will be deleted</td><td><span style="font-weight: bold;">'.$filesKept.'</span></td></tr>';
 
 echo '</table>';
 echo '<br/><br/>';
