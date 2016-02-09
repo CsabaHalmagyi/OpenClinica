@@ -39,3 +39,22 @@ function is_logged_out(){
 		die();
 	}
 }
+
+function removeFiles($path,$timeago) {
+	$files = array();
+	$index = array();
+	if ($handle = opendir($path)) {
+
+		while (false !== ($file = readdir($handle))) {
+			if ($file != "." && $file != "..") {
+				if(is_dir($path.'/'.$file))
+					removeFiles($path.'/'.$file,$timeago);
+				else if(filemtime( $path.'/'.$file ) < $timeago) {
+					unlink($path.'/'.$file);
+					//echo 'Deleted '.$path.'/'.$file."\n";
+				}
+			}
+		}
+		closedir($handle);
+	}
+}

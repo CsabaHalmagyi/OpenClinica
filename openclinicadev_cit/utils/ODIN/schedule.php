@@ -2,15 +2,12 @@
 
 require_once "classes/OpenClinicaSoapWebService.php";
 require_once "classes/OpenClinicaODMFunctions.php";
-require_once 'classes/PHPExcel.php';
 
 require_once 'includes/connection.inc.php';
 require_once 'includes/html_top.inc.php';
 
 is_logged_in();
 require($_SESSION['settingsfile']);
-
-$inputFileName = 'temp/oid_'.$_SESSION['importid'].'_.csv';
 
 //check the study name
 if (isset($_SESSION['studyprotname']) && strlen($_SESSION['studyprotname'])>0){
@@ -39,33 +36,14 @@ if (count($_POST)!=0) {
 	echo '<br/>';
 	// DO THE SCHEDULING HERE
 	
-	$inputFileName = 'temp/oid_'.$_SESSION['importid'].'_.csv';
+	$csvdata = $_SESSION['csvdata'];
+	$highestRow = intval($_SESSION['csvmaxrow']);	
 	
-	//  Read the excel data file
-	try {
-		$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
-		$objPHPExcel = $objReader->load($inputFileName);
-	} catch (Exception $e) {
-		die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-				. '": ' . $e->getMessage());
-	}
-	
-	//  Get worksheet dimensions
-	$sheet = $objPHPExcel->getSheet(0);
-	$highestRow = $sheet->getHighestRow();
-	$highestColumn = $sheet->getHighestColumn();
-	
-	
-	//  Loop through each row of the worksheet in turn
-	for ($row = 2; $row <= $highestRow; $row++) {
-		//  Read a row of data about the subject name
-		$subjName = $sheet->getCell('A'.$row)->getValue();
-
-
+	//  Loop through each row of the csv data
+	for ($row = 1; $row < $highestRow; $row++) {
+		$subjName = $csvdata[$row][0];
 		 //schedule the events
 		for ($i=0;$i<sizeof($eventsMeta);$i++){
-//			echo $subj.' '.$eventsMeta[$i]['id'].' '.$eventsMeta[$i]['date'].' '.$eventsMeta[$i]['time'].'<br/>';
 		
 		$schedule = $client->eventSchedule($subjName, $eventsMeta[$i]['id'],
 				'', $eventsMeta[$i]['date'], $eventsMeta[$i]['time'], '',
@@ -81,11 +59,7 @@ if (count($_POST)!=0) {
 		
 		echo '<br/>';
 		}//end of scheduling loop
-		 
-
-		
-				 
-	}//end of reading xlsx
+	}//end of reading csv data
 	
 	
 	

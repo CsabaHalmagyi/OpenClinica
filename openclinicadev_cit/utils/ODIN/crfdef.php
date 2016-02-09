@@ -2,7 +2,6 @@
 
 require_once "classes/OpenClinicaSoapWebService.php";
 require_once "classes/OpenClinicaODMFunctions.php";
-require_once 'classes/PHPExcel.php';
 
 require_once 'includes/connection.inc.php';
 require_once 'includes/html_top.inc.php';
@@ -18,10 +17,6 @@ else {
 	echo '<br/>Studyname parameter is missing!';
 	die();
 }
-
-
-
-
 
 
 //connect to webservices
@@ -242,11 +237,18 @@ function submitCrfData(){
 			checkboxdata.push($(this).attr("id"));
 			}
 		});
-	//pass the arraydata to the hidden input field in form
-	$('#checkboxdata').val(JSON.stringify(checkboxdata));
-	//submit the form
-	$("#crfdefs")[0].submit();
-	});
+
+	if(checkboxdata.length>0){
+		//pass the arraydata to the hidden input field in form
+		$('#checkboxdata').val(JSON.stringify(checkboxdata));
+		//submit the form
+		$("#crfdefs")[0].submit();
+		
+	}
+	else{
+		alert("You have to select at least one item!");
+		}
+});
 }
 
 </script>

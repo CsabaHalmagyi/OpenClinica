@@ -4,19 +4,13 @@ require_once "classes/OpenClinicaSoapWebService.php";
 
 require_once "classes/OpenClinicaODMFunctions.php";
 
-require_once 'classes/PHPExcel.php';
-
 require_once 'includes/connection.inc.php';
 require_once 'includes/html_top.inc.php';
 is_logged_in();
 require($_SESSION['settingsfile']);
+unset($_SESSION['subjectOIDMap']);
 
 set_time_limit(60);
-
-$inputFileName = 'uploads/data_'.$_SESSION['importid'].'_.csv';
-//connect to the database
-$dbh = new PDO("pgsql:dbname=$db;host=$dbhost", $dbuser, $dbpass );
-
 
 //check the study name
 if (isset($_SESSION['studyprotname']) && strlen($_SESSION['studyprotname'])>0){
@@ -34,14 +28,7 @@ else {
 	$ocUniqueProtocolIDSiteRef = null;
 }
 
-
-
 $ocSecondaryLabel = '';
-//$ocEnrollmentDate = '2014-05-19';
-//$ocPersonID = '1107-TEST-07';
-//$ocGender = 'm';
-//$ocDateOfBirth = '1989-12-16';
-
 
 function startsWith($haystack, $needle)
 {
@@ -55,30 +42,22 @@ $succesCount = 0;
 $failCount = 0;
 $newSubjectsCount = 0;
 //  Read the excel data file
-try {
-	$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
-	$objPHPExcel = $objReader->load($inputFileName);
-} catch (Exception $e) {
-	die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-			. '": ' . $e->getMessage());
-}
 
-//  Get worksheet dimensions
-$sheet = $objPHPExcel->getSheet(0);
-$highestRow = $sheet->getHighestRow();
-$highestColumn = $sheet->getHighestColumn();
+$csvdata = $_SESSION['csvdata'];
+$highestRow = intval($_SESSION['csvmaxrow']);
+//for storing subjectID => oid relations
+$subjectOIDMap = array();
 
+echo '<table id="importsubjectstable"><thead><tr><td>Subject</td><td>Subject status</td><td>OID</td><td>Result</td></tr></thead><tbody>';
 
-//  Loop through each row of the worksheet in turn
-for ($row = 2; $row <= $highestRow; $row++) {
+for ($row = 1; $row < $highestRow; $row++) {
 	//  Read a row of data into an array
-	$subj = $sheet->getCell('A'.$row)->getValue();
-    $secondary = $sheet->getCell('B'.$row)->getValue();
-    $enrollment = $sheet->getCell('C'.$row)->getValue();
-    $person = $sheet->getCell('D'.$row)->getValue();
-    $gender = strtolower($sheet->getCell('E'.$row)->getValue());
-	$dob = $sheet->getCell('F'.$row)->getValue();
+	$subj = $csvdata[$row][0];
+    $secondary = $csvdata[$row][1];
+    $enrollment = $csvdata[$row][2];
+    $person = $csvdata[$row][3];
+    $gender = strtolower($csvdata[$row][4]);
+	$dob = $csvdata[$row][5];
     
 	$dobFinal="";
 	$lastCase = '';
@@ -98,9 +77,7 @@ for ($row = 2; $row <= $highestRow; $row++) {
 	}
 	if ($_SESSION['studyParamConf']['SPL_collectDob']=="2"){
 
-
 		$dobFormat = "/(^([0-9]{2})\\/([0-9]{2})\\/([0-9]{4})$)/";
-		
 		$dobFormat2 = "/^([0-9]{4})$/";
 		$dobFormat3 = "/(^([0-9]{4})-([0-9]{2})-([0-9]{2})$)/";
 		
@@ -109,7 +86,6 @@ for ($row = 2; $row <= $highestRow; $row++) {
 			$dateParts = explode("/",$dob);
 
 			//transform the date to YYYY
-
 			$dobFinal = $dateParts[2];
 
 		}
@@ -148,104 +124,72 @@ for ($row = 2; $row <= $highestRow; $row++) {
 		}
 	}
 
-		//send a subjectCreateSubject request to the server
-      	$createSubject = $client->subjectCreateSubject($ocUniqueProtocolId,
-			$ocUniqueProtocolIDSiteRef, $subj, $secondary,
-			$enrollment, $person, $gender, $dobFinal);
-      
-      	// if the import is successful
-        if ($createSubject->xpath('//v1:result')[0] == 'Success') {
-        $newSubjectsCount++;	 
-        echo '<p>createSubject:<span class="success">' . $createSubject->xpath('//v1:result')[0] . "</span><br/>"; }
-        //if the import is failed
-        else {
-        echo '<p>createSubject:<span class="error">' . $createSubject->xpath('//v1:error')[0] . "</span><br/>"; }
-        
-		
-        
+		// determine whether a subject is an existing subject
+		$isStudySubject = $client->subjectIsStudySubject($ocUniqueProtocolId, $ocUniqueProtocolIDSiteRef, $subj);
+		$subjOID = null;
+		if ($isStudySubject->xpath('//v1:result')[0]=='Success'){
+			$subjOID = (string)$isStudySubject->xpath('//v1:subjectOID')[0];
+			$subjectOIDMap[$subj] = array("subjID"=>$subj,"oid"=>$subjOID,"existed"=>true, "error"=>null);
+			echo '<tr><td>'.$subj.'</td><td>Existing</td><td>'.$subjOID.'</td><td><span class="success">OK</span></td></tr>';
+		}
+		else{
 
-        //GET THE SUBJ OID HERE
-        //check the site name
-        if (isset($_SESSION['siteprotname']) && strlen($_SESSION['siteprotname'])>0){
-        $sql= "SELECT ss.oc_oid,ss.label, s.unique_identifier FROM study_subject ss, study s 
-        		WHERE ss.label= '".$subj."' 
-        		AND s.study_id = ss.study_id AND s.unique_identifier='".$_SESSION['siteprotname']."'";
-        
-        $sth = $dbh->prepare($sql);
-        $sth->execute();
-        
-        $result = $sth->fetch(PDO::FETCH_ASSOC);
-        
-        
-        }
-        // if there was no site chosen, use the study instead
-        else {
-        $sql= "SELECT ss.oc_oid,ss.label, s.unique_identifier FROM study_subject ss, study s 
-        		WHERE ss.label= '".$subj."' 
-        		AND s.study_id = ss.study_id AND s.unique_identifier='".$ocUniqueProtocolId."'";
-        
-        
-        $sql= "SELECT ss.oc_oid,ss.label, s.unique_identifier
-        		      FROM study_subject ss, study s   
-        		WHERE ss.label= '".$subj."'        
-        		AND ss.study_id = s.study_id        
-        		AND (s.parent_study_id = (          
-        			select distinct s2.study_id          
-        			from study s2          
-        			where s2.unique_identifier='".$ocUniqueProtocolId."')          
-        			or s.unique_identifier='".$ocUniqueProtocolId."' )";
-        }     
-        
-        $sth = $dbh->prepare($sql);
-        $sth->execute();
-        
-        $result = $sth->fetch(PDO::FETCH_ASSOC);
-
-
-			//display the result
-        	echo 'Subject name in csv: '.$subj."<br/>";
-        	if (isset($result['oc_oid'])){
+			//send a subjectCreateSubject request to the server
+			$createSubject = $client->subjectCreateSubject($ocUniqueProtocolId,
+					$ocUniqueProtocolIDSiteRef, $subj, $secondary,
+					$enrollment, $person, $gender, $dobFinal);
+			
+			// if the import is successful
+			if ($createSubject->xpath('//v1:result')[0] == 'Success') {
+				
+				$isStudySubject = $client->subjectIsStudySubject($ocUniqueProtocolId, $ocUniqueProtocolIDSiteRef, $subj);
+				if ($isStudySubject->xpath('//v1:result')[0]=='Success'){
+					$subjOID = (string)$isStudySubject->xpath('//v1:subjectOID')[0];
+					$subjectOIDMap[$subj] = array("subjID"=>$subj,"oid"=>$subjOID,"existed"=>false, "error"=>null);
+					echo '<tr><td>'.$subj.'</td><td>New</td><td>'.$subjOID.'</td><td><span class="success">OK</span></td></tr>';
+					$newSubjectsCount++;
+						
+				}
+				else{
+					$err = (string)$createSubject->xpath('//v1:error')[0];
+					$subjectOIDMap[$subj] = array("subjID"=>$subj,"oid"=>"MISSING_SUBJECT_OID","existed"=>false, "error"=>$err);
+					echo '<tr><td>'.$subj.'</td><td>Error</td><td>MISSING_SUBJECT_OID</td><td><span class="error">'.$err.'</span></td></tr>';
+						
+				}
+			}
+				//if the import is failed
+			else {
+				$err = (string)$createSubject->xpath('//v1:error')[0];
+				$subjectOIDMap[$subj] = array("subjID"=>$subj,"oid"=>"MISSING_SUBJECT_OID","existed"=>false, "error"=>$err);
+				echo '<tr><td>'.$subj.'</td><td>Error</td><td>MISSING_SUBJECT_OID</td><td><span class="error">'.$err.'</span></td></tr>';
+				
+				}
+		}
+	
+        	if ($subjOID!=null){
         		$succesCount++;
-        		$subjoid = $result['oc_oid'];
-        		$label = $result['label'];
-        		
-        		echo '<span class="success">';
-        		echo 'SOID = '.$subjoid.'</span>';
-        		echo ' label = '.$label.'</p>';
         	}
         	else{
         		$failCount++;
-        		$subjoid = "MISSING_SUBJ_OID";
-        		echo '<span class="error">';
-        		echo 'SOID = '.$subjoid.'</span>';
-        		echo ' label = SUBJECT NOT FOUND! </p>';
         	}
         
        
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1,$row, $subjoid);
 	flush();
 	ob_flush();
   
        
-}//end of reading xlsx
+}//end of reading csvdata
 
-//remove date of birth and gender columns from the data file, add subj_oid column
-$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1,1, 'SUBJ_OID');
-$objPHPExcel->getActiveSheet()->removeColumn('C');
-$objPHPExcel->getActiveSheet()->removeColumn('C');
-$objPHPExcel->getActiveSheet()->removeColumn('C');
-$objPHPExcel->getActiveSheet()->removeColumn('C');
-//create oid data file
-$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'CSV');
-$objWriter->save("temp/oid_".$_SESSION['importid']."_.csv");
 
-//var_dump($subjects);
-
-echo '<p>';
-echo 'Subjects import finished.<br/><br/>';
+echo '</tbody></table><br/>';
+echo '<p>Subjects import finished.<br/><br/>';
 echo 'Subj OIDs retrieved: '.$succesCount.'<br/>';
 echo 'New subjects: '.$newSubjectsCount.'<br/>';
 echo 'Errors: '.$failCount.'<br/></p>';
+
+$_SESSION['subjectOIDMap'] = $subjectOIDMap;
+
+echo '<br/>';
 
 if ($succesCount>0)
 	echo '<p><a href="schedule.php" class="easyui-linkbutton" data-options="iconCls:\'icon-large-clipart\'">Continue to scheduling events</a></p>';

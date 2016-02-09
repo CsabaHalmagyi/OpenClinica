@@ -225,33 +225,11 @@ for ($row = 2; $row <= $highestRow; $row++) {
 }//end of if isMapFile
 
 
-//read xls headers
-$inputFileName = 'temp/oid_'.$_SESSION['importid'].'_.csv';
-//  Read your Excel workbook
-try {
-	$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
-	$objPHPExcel = $objReader->load($inputFileName);
-} catch (Exception $e) {
-	die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-			. '": ' . $e->getMessage());
-}
+//reading csv headers
+$csvdata = $_SESSION['csvdata'];
+$highestRow = intval($_SESSION['csvmaxrow']);
 
-//  Get worksheet dimensions
-$sheet = $objPHPExcel->getSheet(0);
-$highestRow = $sheet->getHighestRow();
-$highestColumn = $sheet->getHighestColumn();
-
-$excelHeaders= array();
-//  Loop through the first row of the worksheet
-for ($row = 1; $row <= 1; $row++) {
-	//  Read a row of data into an array
-	$rowData = $sheet->rangeToArray('C' . $row . ':' . $highestColumn . $row,
-			NULL, TRUE, FALSE);
-
-	$excelHeaders =  $rowData[0];
-}
-//end reading xls headers
+$excelHeaders = array_slice($csvdata[0],6);
 
 if ($isMapFile) {
 	echo '<p><span class="success">Mapping file found!</span></p><br/>';
@@ -320,7 +298,11 @@ echo '</tr>';
 echo '</tbody></table>';
 echo '</div></td></tr></table>';
 echo '<p><input type="checkbox" id="skipEmptyCells" name="skipEmptyCells" checked/> Skip empty cells in datafile';
-echo '<br/><input type="button" value="Create ODM XML!" onclick="passDataToImport()" class="easyui-linkbutton" data-options="iconCls:\'icon-next\'"/>';
+echo '<br/>Form(s) status: <select id="formstatus" name="formstatus">';
+echo '<option value="complete">Complete</option>';
+echo '<option value="entrystarted">Data entry started</option>';
+echo '</select>';
+echo '<br/><br/><input type="button" value="Create ODM XML!" onclick="passDataToImport()" class="easyui-linkbutton" data-options="iconCls:\'icon-next\'"/>';
 echo '<input type="hidden" name="mapdata" id="mapdata"/>';
 echo '<input type="hidden" name="cbSkip" id="cbSkip"/>';
 

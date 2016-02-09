@@ -6,9 +6,8 @@
  * 
  * 
  */
-
 require_once 'includes/connection.inc.php';
-
+require_once 'config/odinconfig.inc.php';
 is_logged_out();
 //if the login form was submitted
 if (count($_POST)!=0) {
@@ -33,17 +32,16 @@ if (count($_POST)!=0) {
         }catch (PDOException $e) {
    			 echo 'Connection failed: ' . $e->getMessage();
 			}
-        $query = "SELECT * FROM user_account WHERE user_name='".trim($_POST['username'])."'";
+        $query = "SELECT * FROM user_account WHERE user_name='".trim($_POST['username'])."' AND status_id=1";
         
         $sth = $dbh->prepare($query);
         $sth->execute();
         
         $result = $sth->fetch(PDO::FETCH_ASSOC);
-
         
         if (!$result['user_id']) {        		
         	$error[4]='Username and password combination is wrong! <br/>
-        				Forgot your password?';}
+        				Forgot your password? Contact '.$adminContactEmail;}
         	
         //username and password is ok
         else if ($result['passwd']==$sha1pass){
@@ -52,6 +50,17 @@ if (count($_POST)!=0) {
         	$_SESSION=$result;
         	$_SESSION['settingsfile']=$settingsfile;
         	$_SESSION['importid']=uniqid();
+        	
+        	//delete old files if setting is enabled
+        	
+        	if(isset($deleteFilesOlderThan) && $deleteFilesOlderThan>0){
+        		
+        		removeFiles('./uploads',time()-$deleteFilesOlderThan);
+        		removeFiles('./map',time()-$deleteFilesOlderThan);
+        		removeFiles('./savedxmls',time()-$deleteFilesOlderThan);
+        		
+        	}
+
         	redirect("index.php");
         	}
         	else {
@@ -60,14 +69,12 @@ if (count($_POST)!=0) {
         	}
         	else {
         		$error[4]='Username and password combination is wrong! <br/>
-        				Forgot your password?';
+        				Forgot your password? Contact '.$adminContactEmail;;
         	}
-
     }
     
  }
  require_once 'includes/html_top.inc.php';
-
 ?>
 
 <div id="logindiv">
@@ -94,7 +101,6 @@ if (count($_POST)!=0) {
 $settingFiles = array();
 $dir = 'settings';
 $cdir = scandir($dir);
-
 foreach ($cdir as $key => $value)
 {
 	if (!in_array($value,array(".","..","example.inc.php")))
@@ -109,7 +115,6 @@ foreach ($cdir as $key => $value)
 		}
 	}
 }
-
 ?>    
     
 <td><select name="instance" id="instance">
@@ -121,7 +126,6 @@ foreach ($settingFiles as $sf){
 	if ($handle) {
 		while ( ($line = fgets ( $handle )) !== false) {
 			$words = explode ( "=", $line, 2 );
-
 			if (trim($words[0])=='$ocInstanceName'){
 				$ocName = str_replace('"','',trim($words[1]));
 				$ocName = str_replace(';','',$ocName);
@@ -134,8 +138,6 @@ foreach ($settingFiles as $sf){
 			
 		}
 	}
-
-
 }
 ?>	
 	
@@ -150,7 +152,6 @@ foreach ($settingFiles as $sf){
 <?php 
 if (isset($error) && count($error)!=0){
 echo '<div id="errormessages">';
-
 	foreach ($error as $err){
 		echo $err.'<br/>';
 	}

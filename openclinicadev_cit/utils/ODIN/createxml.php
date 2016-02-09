@@ -2,7 +2,6 @@
 
 require_once "classes/OpenClinicaSoapWebService.php";
 require_once "classes/OpenClinicaODMFunctions.php";
-require_once "classes/ocODMExtended.php";
 require_once 'classes/PHPExcel.php';
 
 require_once 'includes/connection.inc.php';
@@ -36,21 +35,20 @@ if (isset($_POST['groupsAll'])){
 if (isset($_POST['itemsAll'])){
 	$itemsAll = json_decode($_POST['itemsAll'],true);}
 			
-					
-	
 // Skip empty cells in datafile?
 if (isset($_POST['cbSkip'])){
 	$skipEmptyCells = false;
 	if ($_POST['cbSkip']=="true") {
 		$skipEmptyCells = true;}
-//	echo '<br/>Skipping empty cells:';
-//	echo $skipEmptyCells?'true':'false';
-//	echo '<br/>';
-	//var_dump($skipEmptyCells);
 }
 
-//set input file name
-$inputFileName = 'temp/oid_'.$_SESSION['importid'].'_.csv';
+if (isset($_POST['formstatus']) && $_POST['formstatus'] == "entrystarted"){
+	$formstatus = "dataentrystarted";
+}
+else{
+	$formstatus = "complete";
+}
+
 
 //check the study name
 if (isset($_SESSION['studyprotname']) && strlen($_SESSION['studyprotname'])>0){
@@ -97,46 +95,31 @@ else{
 	$study = $_SESSION['studyoid'];
 	
 }
-$odmXML = new ocODMclinicalDataE($study, 1, array());
-
-
-//  Read your Excel workbook
-try {
-	$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
-	$objPHPExcel = $objReader->load($inputFileName);
-} catch (Exception $e) {
-	die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-			. '": ' . $e->getMessage());
-}
+$odmXML = new ocODMclinicalData($study, 1, array());
 
 set_time_limit(3000);
 
 //  READING THE DATA FILE FROM HERE
-$sheet = $objPHPExcel->getSheet(0);
-$highestRow = $sheet->getHighestRow();
-$highestColumn = $sheet->getHighestColumn();
+$csvdata = $_SESSION['csvdata'];
+$highestRow = intval($_SESSION['csvmaxrow']);
+
 
 
 
 	//  Read the header data into an array
-	$excelHeaders = $sheet->rangeToArray('C' . '1' . ':' . $highestColumn . '1',
-			NULL, TRUE, FALSE);
+	$excelHeaders = $csvdata[0];
 
 	//read the rest of the data
 	$excelDataArray= array();
 	//  Loop through each row of the worksheet in turn
-	for ($row = 2; $row <= $highestRow; $row++) {
-		set_time_limit(10);
-		//  Read a row of data into an array
-		$rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
-				NULL, FALSE, TRUE, false);
+	for ($row = 1; $row < $highestRow; $row++) {
 		
-		array_push($excelDataArray, $rowData[0]);
+		//  Read a row of data into an array
+		$rowData = $csvdata[$row];
+		
+		array_push($excelDataArray, $rowData);
 	}
-	
 
-	//var_dump($excelDataArray);
 	echo '<table id="dataImportResult"><thead><tr><td>Subject name</td><td>Event id</td><td>O#</td><td>Form id</td><td>Item id</td>
 			<td>Value</td><td>Result</td></tr></thead>';
 	echo '<tbody>';
@@ -144,21 +127,24 @@ $highestColumn = $sheet->getHighestColumn();
 	for ($i=0;$i<sizeof($excelDataArray);$i++){
 	
 	//read subject oid from the array
-	$subject=$excelDataArray[$i][1];
-	$subjectName = $excelDataArray[$i][0];		
+	$subject=null;
+	$subjectName = $excelDataArray[$i][0];
+	
+	if (isset($_SESSION['subjectOIDMap'][$subjectName])){
+		$subject = $_SESSION['subjectOIDMap'][$subjectName]['oid'];
+	}
+	
 	//if the oid is missing, skip that subject
-	if ($subject=='MISSING_SUBJ_OID') continue;
+	if ($subject=='MISSING_SUBJECT_OID') continue;
 	//reset the event occurences for every subject
 	$eventOccurrences = [];
 		//read the data rows for the subject
-		for ($j=2;$j<sizeof($excelDataArray[$i]);$j++){
+		for ($j=6;$j<sizeof($excelDataArray[$i]);$j++){
 
-		$headerValue = $excelHeaders[0][$j-2];
+		$headerValue = $excelHeaders[$j];
 		
-		if (is_float($excelDataArray[$i][$j])) {
-			$dataValue=strval($excelDataArray[$i][$j]);
-		}
-		else $dataValue = $excelDataArray[$i][$j];
+		$dataValue = $excelDataArray[$i][$j];
+		
 		//if the header can be found in the associated header list
 		if (isset($mapdata[$headerValue])){
 			$replaceValues = $mapdata[$headerValue];
@@ -187,23 +173,6 @@ $highestColumn = $sheet->getHighestColumn();
 				
 					// deal with the repeating events here
 			
-					/* 					
-					$sql = "SELECT
-					max(study_event.sample_ordinal) as last_event
-					FROM
- 					public.study
-					INNER JOIN
-  					public.study_subject ON study.study_id = study_subject.study_id
-					INNER JOIN
-  					public.study_event ON study_subject.study_subject_id = study_event.study_subject_id
-					INNER JOIN
-  					public.study_event_definition ON study_subject.study_id = study_event_definition.study_id AND
-                    study_event.study_event_definition_id = study_event_definition.study_event_definition_id
- 
-					WHERE study.unique_identifier = '".$ocUniqueProtocolId."' 
-					AND study_subject.label = '".$subjectName."' 
-					AND study_event_definition.oc_oid = '".$meta[0]."'";	 
-					*/		
 					
 					$sql =	"SELECT max(study_event.sample_ordinal) as last_event
 					FROM
@@ -244,7 +213,7 @@ $highestColumn = $sheet->getHighestColumn();
 						for($k=1;$k<sizeof($groupData);$k++){
 							if (!empty($groupData[$k])){
 
-								$odmXML->add($study, $subject, $event, $eventOccurrence, $form, $group,$k, $item, $groupData[$k]);
+								$odmXML->add_subject($subject, $event, $eventOccurrence, $form, $formstatus, $group,$k, $item, $groupData[$k]);
 							}	
 						}
 						
@@ -253,7 +222,7 @@ $highestColumn = $sheet->getHighestColumn();
 					//this is not a repeating item value
 					//adding the value to the odmXML object.
 
-					$odmXML->add($study, $subject, $event, $eventOccurrence, $form, $group,1, $item, $value);
+					$odmXML->add_subject($subject, $event, $eventOccurrence, $form, $formstatus, $group,1, $item, $value);
 				}
 				
 

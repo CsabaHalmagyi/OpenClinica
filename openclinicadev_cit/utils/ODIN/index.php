@@ -6,8 +6,16 @@ require($_SESSION['settingsfile']);
 //unset site settings if there were any
 unset($_SESSION['siteprotname']);
 unset($_SESSION['siteoid']);
+unset($_SESSION['studyprotname']);
+unset($_SESSION['studyoid']);
+
 
 unset($_SESSION['studyParamConf']);
+unset($_SESSION['csvdata']);
+unset($_SESSION['csvmaxrow']);
+unset($_SESSION['csvmaxcol']);
+unset($_SESSION['subjectOIDMap']);
+
 //var_dump($_SESSION);
 ?>
 <br/>
@@ -28,25 +36,17 @@ if (!file_exists('savedxmls/'.htmlspecialchars($_SESSION['user_name']))) {
 }
 
 //check user directory for temporary files
-if (!file_exists('temp')) {
+if (!file_exists('uploads')) {
 	//create the user's directory if not exists
-	mkdir('temp', 0755, true);
-}
-
-//check user directory for temporary files
-if (!file_exists('upload')) {
-	//create the user's directory if not exists
-	mkdir('upload', 0755, true);
+	mkdir('uploads', 0755, true);
 }
 
 
 //reset import session if needed
 if (isset($_GET['import_session']) && $_GET['import_session']=="reset"){
-unset($_SESSION['studyprotname']);
-unset($_SESSION['studyoid']);
-unset($_SESSION['studyParamConf']);
-$old_importid = $_SESSION['importid'];
-$_SESSION['importid'] = uniqid();}
+	$old_importid = $_SESSION['importid'];
+	$_SESSION['importid'] = uniqid();
+}
 
 //connect to the database
 $dbh = new PDO("pgsql:dbname=$db;host=$dbhost", $dbuser, $dbpass );

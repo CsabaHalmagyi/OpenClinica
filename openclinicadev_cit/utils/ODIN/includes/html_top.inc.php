@@ -37,7 +37,7 @@ else{
 <link rel="stylesheet" href="css/style.css" type="text/css" />
 <link rel="stylesheet" href="css/icon.css" type="text/css" />
 <link rel="stylesheet" type="text/css" href="css/easyui.css"/>
-<title>O D I N Beta</title>
+<title>O D I N</title>
 <script
 	src="js/jquery.min.js"></script>
 <script type="text/javascript"
@@ -97,7 +97,7 @@ else{
 				<p>
 				<?php 
 
-			//	var_dump($_SESSION);
+				//var_dump($_SESSION);
 				
 				if ($_SESSION['user_id']){
 				?>
